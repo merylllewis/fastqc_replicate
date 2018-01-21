@@ -1,5 +1,6 @@
 import numpy as np
 import fastqc_plots
+import matplotlib.pyplot as plt
 
 
 def per_sequence_quality(sequences, quality_scores, plot_directory):
@@ -51,3 +52,19 @@ def per_base_sequence_content(sequences, plot_directory):
         gc_per_position[i] = group_by_base[1][i] + group_by_base[2][i]
 
     fastqc_plots.gc_content(gc_per_position, np.linspace(1, number_positions, number_positions, dtype = "int"), plot_directory)
+
+
+def per_base_sequence_quality(quality_scores, plot_directory):
+
+    quality_by_position = []
+
+    for i in range(0, len(quality_scores[0])):
+        new_list = []
+
+        for j in range(0, len(quality_scores)):
+            new_list.append(quality_scores[j][i])
+
+        quality_by_position.append(new_list)
+
+    fastqc_plots.plot_per_base_sequence_quality(quality_by_position, plot_directory)
+
