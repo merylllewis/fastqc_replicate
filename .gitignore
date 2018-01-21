@@ -1,4 +1,6 @@
 data
+# Output files
+*plots/
 
 # PyCharm files
 .idea
@@ -7,5 +9,6 @@ data
 __pycache__/
 *.py[cod]
 *$py.class
+
 
 
