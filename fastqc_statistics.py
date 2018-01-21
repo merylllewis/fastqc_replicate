@@ -1,0 +1,53 @@
+import numpy as np
+import fastqc_plots
+
+
+def per_sequence_quality(sequences, quality_scores, plot_directory):
+    """
+    Calculates average quality scores for each sequence. Average is the sum of a sequence's quality scores/
+    length of sequence
+    :param sequences: a list of all sequences
+    :param quality_scores: a list of a list of quality scores for each sequence
+    :param plot_directory: Name of the directory to save plots
+    :return: nothing, calls plotting function for average quality scores
+    """
+    average_q_scores = []
+    # y axis: number of reads, x axis: quality scores
+    for i in range(len(sequences)):
+        sum_q_scores = 0
+        for j in range(len(quality_scores[i])):
+            sum_q_scores += quality_scores[i][j]
+        average_q_scores.append(float(sum_q_scores/len(quality_scores[i])))
+
+    fastqc_plots.plot_per_sequence_quality(average_q_scores, plot_directory)
+
+
+def per_base_sequence_content(sequences, plot_directory):
+    occurrence_bases = {key: np.zeros(len(sequences[0])) for key in ["A", "C", "G", "T", "N"]}
+    for each_sequence in sequences:
+
+        for position in range(len(each_sequence)):
+                occurrence_bases[each_sequence[position]][position] += 1
+    group_by_base = []
+    for base in occurrence_bases.keys():
+        group_by_base.append(occurrence_bases[base])
+
+    number_positions = len(occurrence_bases["A"])
+
+    for position in range(0, number_positions):
+
+        cumulative = 0
+
+        for base in occurrence_bases.keys():
+            cumulative += occurrence_bases[base][position]
+
+        for base in range(0, len(occurrence_bases)):
+            group_by_base[base][position] /= float(cumulative) / 100
+
+    fastqc_plots.plot_per_base_sequence_content(group_by_base, plot_directory)
+
+    gc_per_position = np.zeros(number_positions)
+    for i in range(number_positions):
+        gc_per_position[i] = group_by_base[1][i] + group_by_base[2][i]
+
+    fastqc_plots.gc_content(gc_per_position, np.linspace(1, number_positions, number_positions, dtype = "int"), plot_directory)
