@@ -93,7 +93,6 @@ def plot_per_base_sequence_content(group_by_base, plot_directory):
     plt.close()
 
 
-
 def gc_content(cg_bases_by_position, x_range, plot_directory):
 
     fig = plt.figure(figsize = (18,9))
@@ -150,3 +149,13 @@ def plot_per_base_sequence_quality(quality_by_position, plot_directory):
 
     plt.savefig(plot_path, bbox_inches = "tight")
     plt.close()
+
+
+def plot_per_sequence_gc_content(gc_content_by_sequence, plot_directory):
+    bins_array = np.linspace(0, 100, 101)
+    fig = plt.figure(figsize = (18, 9))  # width, height
+    ax = fig.add_subplot(111)
+    bin_frequencies, bin_edges = np.histogram(gc_content_by_sequence, bins = bins_array)
+
+    plt.plot(bins_array[:-1], bin_frequencies)
+    plt.show()

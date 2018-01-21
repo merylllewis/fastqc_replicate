@@ -50,7 +50,7 @@ def main(arguments):
     fastqc_stats.per_sequence_quality(sequences, quality_scores, plot_directory)
     fastqc_stats.per_base_sequence_content(sequences, plot_directory)
     fastqc_stats.per_base_sequence_quality(quality_scores, plot_directory)
-
+    fastqc_stats.per_sequence_gc_content(sequences, plot_directory)
 
 if __name__ == "__main__":
     main(sys.argv)

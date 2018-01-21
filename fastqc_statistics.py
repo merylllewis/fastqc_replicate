@@ -68,3 +68,25 @@ def per_base_sequence_quality(quality_scores, plot_directory):
 
     fastqc_plots.plot_per_base_sequence_quality(quality_by_position, plot_directory)
 
+
+def gc_content(sequence):
+    gc_bases = ["G", "C"]
+    total_gc_content = 0
+
+    for base in sequence:
+        if base in gc_bases:
+            total_gc_content += 1
+    total_gc_content = 100 * float(total_gc_content)/len(sequence)
+
+    return total_gc_content
+
+
+def per_sequence_gc_content(sequences, plot_directory):
+    # TODO: figure out theoretical gc content
+    gc_content_by_sequence = []
+    for each_sequence in sequences:
+        gc_content_by_sequence.append(gc_content(each_sequence))
+
+    fastqc_plots.plot_per_sequence_gc_content(gc_content_by_sequence, plot_directory)
+
+
