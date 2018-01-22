@@ -109,8 +109,6 @@ def per_sequence_gc_content(sequences, plot_directory):
     :return: nothing, calls plotting function to plot number of reads v/s %GC content
     """
 
-    # TODO: Plot theoretical GC content
-
     gc_content_by_sequence = []
 
     for each_sequence in sequences:
