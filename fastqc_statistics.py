@@ -1,6 +1,5 @@
 import numpy as np
 import fastqc_plots
-import matplotlib.pyplot as plt
 
 
 def per_sequence_quality(sequences, quality_scores, plot_directory):
@@ -88,5 +87,36 @@ def per_sequence_gc_content(sequences, plot_directory):
         gc_content_by_sequence.append(gc_content(each_sequence))
 
     fastqc_plots.plot_per_sequence_gc_content(gc_content_by_sequence, plot_directory)
+
+
+def sequence_duplication(sequences, plot_directory):
+    counts_each_sequence = dict()
+    total_num_sequences = len(sequences)
+    for sequence in sequences:
+
+        if len(sequence) > 75:
+            sequence_key = sequence[0:50]
+        else:
+            sequence_key = sequence
+
+        if sequence_key in counts_each_sequence.keys():
+            counts_each_sequence[sequence_key] += 1
+        else:
+            counts_each_sequence[sequence_key] = 1
+
+    duplication_level_counts = np.zeros(10, dtype = "float")
+    deduplicated_counts = np.zeros(10, dtype = "float")
+
+    for duplication_level in range(1, 11):
+        for key in counts_each_sequence.keys():
+            if counts_each_sequence[key] == duplication_level:
+                duplication_level_counts[duplication_level-1] += float(duplication_level)*(100.0/total_num_sequences)
+                deduplicated_counts[duplication_level-1] += 100.0/len(counts_each_sequence.keys())
+
+    remainder_after_deduplication = 100.0 * float(len(counts_each_sequence.keys()))/total_num_sequences
+
+    fastqc_plots.plot_sequence_duplication(duplication_level_counts, deduplicated_counts, remainder_after_deduplication,
+                                           plot_directory)
+
 
 

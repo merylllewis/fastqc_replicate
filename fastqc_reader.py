@@ -10,6 +10,7 @@ import sys
 import argparse
 import os
 import fastqc_statistics as fastqc_stats
+import fastqc_plots
 
 
 def fastq_reader(file_name):
@@ -51,6 +52,9 @@ def main(arguments):
     fastqc_stats.per_base_sequence_content(sequences, plot_directory)
     fastqc_stats.per_base_sequence_quality(quality_scores, plot_directory)
     fastqc_stats.per_sequence_gc_content(sequences, plot_directory)
+    fastqc_stats.sequence_duplication(sequences, plot_directory)
+    fastqc_plots.plot_sequence_length_distribution(sequences, plot_directory)
+    fastqc_plots.over_represented_sequences(sequences, plot_directory)
 
 if __name__ == "__main__":
     main(sys.argv)
