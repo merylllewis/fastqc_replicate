@@ -10,11 +10,14 @@ fastqc_replicate is a program that replicates the FASTQC quality control program
 
 There are 3 modules: fastqc_reader.py (main function), fastqc_statistics.py (calculates all the statistics) and fastqc_plots.py (plots all the statistics from fastqc_statistics.py)
 
-To run: python fastqc_reader.py "input fastq file (.fastq or .fq)"
+To run: $ python fastqc_reader.py "input fastq file (.fastq or .fq)" in command-line
 
-Example: Ran a sample FASTQ file: SRA file: SRR1972739, Zika Virus data, first 10000 lines
+Example: 
+Ran a sample FASTQ file: SRA file: SRR1972739, Ebola Virus data, first 10000 lines
+
 To fetch data: fastq-dump -X 10000 --split-files SRR1972739.sra
 More info: https://www.ncbi.nlm.nih.gov/bioproject/?term=PRJNA257197%20
+
 Results from fastqc_replicate:
 https://docs.google.com/document/d/1kzrqJ0Bcq8eS1bqBFqxpQNUDRlJEr3GuFzZpc_EZwfk/edit?usp=sharing
 https://docs.google.com/document/d/1r1c4HkbLzOodMBlnJoaS2PpxKRKt-7Nf3SCWlLQBAo4/edit?usp=sharing
