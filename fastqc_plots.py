@@ -11,7 +11,7 @@ def plot_per_sequence_quality(average_q_scores, file_name):
 
     :param average_q_scores: same as above
     :param file_name: same as above
-    :return:
+    :return: nothing
 
     """
 
@@ -30,7 +30,7 @@ def plot_per_sequence_quality(average_q_scores, file_name):
     # Create a line plot of number of reads versus average quality scores
     plt.plot(histogram_bins[:-1], bin_frequencies)
 
-    # Setting horizontal grid
+    # Setting x axis grid
     ax.xaxis.grid(which = "major", linestyle = '-.', linewidth = 0.5, alpha = 0.5)
 
     # Setting x axis ticks
@@ -68,6 +68,14 @@ def plot_per_sequence_quality(average_q_scores, file_name):
 
 
 def plot_per_base_sequence_content(group_by_base, plot_directory):
+    """
+    Plots the %occurence of each base at each position. X axis: position in a read, Y axis: percentage
+
+    :param group_by_base: dictionary of % occurrence of each base at each position. key: base, values: %of the base at
+                          each position in a read
+    :param plot_directory: Name of the directory to save plots
+    :return: nothing
+    """
     color_palette = ["blue", "black", "red", "green", "violet"]    # Setting colors for each base
     number_positions = len(group_by_base["A"])   # number_positions = length of each sequence
 
@@ -83,7 +91,7 @@ def plot_per_base_sequence_content(group_by_base, plot_directory):
     plt.plot(x_range, group_by_base["T"], color = color_palette[3])
     plt.plot(x_range, group_by_base["N"], color = color_palette[4])
 
-    # setting horizontal grid
+    # Setting x axis grid
     ax.xaxis.grid(which = "major", linestyle = '-.', linewidth = 0.5, alpha = 0.5)
 
     # setting x axis ticks
@@ -114,14 +122,28 @@ def plot_per_base_sequence_content(group_by_base, plot_directory):
 
 
 def gc_content(cg_bases_by_position, x_range, plot_directory):
+    """
+    Plots the % GC content at each position in a read. X axis: position in a read, Y axis: %GC content
+
+    :param cg_bases_by_position: list of the % GC content at each position in reads
+    :param x_range: range for the x axis
+    :param plot_directory: Name of the directory to save plots
+    :return: nothing
+    :return:
+    """
 
     fig = plt.figure(figsize = (18, 9))
     ax = fig.add_subplot(111)
 
     plt.plot(x_range, cg_bases_by_position)
     plot_path = os.path.join(plot_directory, "gc_content.png")
+
+    # Setting x axis ticks
     plt.xticks(x_range[::5])  # xticks positions
     ax.set_xticklabels(x_range[::5], fontsize = 16)
+
+    # Setting x axis grid
+    ax.xaxis.grid(which = "major", linestyle = '-.', linewidth = 0.5, alpha = 0.5)
 
     # Setting x axis limits
     plt.xlim([1, x_range[-1]])
@@ -133,9 +155,9 @@ def gc_content(cg_bases_by_position, x_range, plot_directory):
     ax.set_yticklabels(yticks_names, fontsize = 16)
 
     # Setting labels, title and  legend
-    ax.set_xlabel("Position in a read)", fontsize = 16)
+    ax.set_xlabel("Position in a read (bp)", fontsize = 16)
     ax.set_ylabel("Percentage occurrence ", fontsize = 16)
-    ax.set_title("GC content across all bases ", fontsize = 16)
+    ax.set_title("GC content across all positions in reads ", fontsize = 16)
     legend_name = ["GC_content"]
     ax.legend(legend_name, loc = "upper left", fontsize = 16)
 
@@ -146,6 +168,15 @@ def gc_content(cg_bases_by_position, x_range, plot_directory):
 
 
 def plot_per_base_sequence_quality(quality_scores_over_position, plot_directory):
+    """
+    Plots the quality score distribution (boxplot) over each position in the reads. X axis: position in read, Y axis:
+    quality scores
+
+    :param quality_scores_over_position: list of list of all quality scores in a position
+    :param plot_directory: Name of the directory to save plots
+    :return: nothing
+
+    """
 
     # Create figure for plot and add subplot
     fig = plt.figure(figsize = (18, 9))
@@ -161,6 +192,9 @@ def plot_per_base_sequence_quality(quality_scores_over_position, plot_directory)
 
     # Setting x axis limits
     plt.xlim([0, x_range[-1]])
+
+    # Setting x axis grid
+    ax.xaxis.grid(which = "major", linestyle = '-.', linewidth = 0.5, alpha = 0.5)
 
     # Setting y axis ticks
     max_q_score = max(max(quality_scores_over_position))
@@ -181,6 +215,13 @@ def plot_per_base_sequence_quality(quality_scores_over_position, plot_directory)
 
 
 def plot_per_sequence_gc_content(gc_content_by_sequence, plot_directory):
+    """
+    Plots Number of reads v/s mean GC content. X axis: Mean GC content, Y axis: Number of reads
+
+    :param gc_content_by_sequence: list of %GC content of all sequences
+    :param plot_directory: Name of the directory to save plots
+    :return: nothing
+    """
 
     # Create a new figure and add a subplot
     fig = plt.figure(figsize = (18, 9))  # width, height
@@ -200,6 +241,9 @@ def plot_per_sequence_gc_content(gc_content_by_sequence, plot_directory):
 
     # Setting x axis limits
     plt.xlim([1, x_range[-1]])
+
+    # Setting x axis grid
+    ax.xaxis.grid(which = "major", linestyle = '-.', linewidth = 0.5, alpha = 0.5)
 
     # Setting range of y axis as ceiling (max bin frequency), auto-scales the y axis
     y_range = math.ceil(float(np.amax(bin_frequencies)) / 100) * 100
@@ -221,8 +265,17 @@ def plot_per_sequence_gc_content(gc_content_by_sequence, plot_directory):
     plt.close()
 
 
-def plot_sequence_duplication(duplication_counts, deduplicated_counts, remainder_after_deduplication,
-                              plot_directory):
+def plot_sequence_duplication(duplication_counts, deduplicated_counts, remainder_after_deduplication, plot_directory):
+    """
+    Plots the percentage distribution of all duplicated reads out of total reads and out of total unique reads
+    X axis: number of duplicated reads, Y axes: Percentage of total reads, Percentage of unique reads
+
+    :param duplication_counts: percentage of duplicated reads versus duplication level
+    :param deduplicated_counts: percentage of unique reads versus duplication level
+    :param remainder_after_deduplication: number of reads that remain after removing duplicated reads
+    :param plot_directory: Name of the directory to save plots
+    :return: nothing
+    """
 
     # Create a new figure and add a subplot
     fig = plt.figure(figsize=(18, 9))
@@ -243,6 +296,9 @@ def plot_sequence_duplication(duplication_counts, deduplicated_counts, remainder
 
     # Setting x axis limits
     plt.xlim([1, x_range[-1]])
+
+    # Setting x axis grid
+    ax.xaxis.grid(which = "major", linestyle = '-.', linewidth = 0.5, alpha = 0.5)
 
     # Setting y axis ticks
     yticks_names = np.linspace(0, 100, 11, dtype = int)  # y axis: 11 ticks
@@ -266,6 +322,15 @@ def plot_sequence_duplication(duplication_counts, deduplicated_counts, remainder
 
 
 def plot_sequence_length_distribution(length_all_sequences_dict, plot_directory):
+    """
+    Plots the distribution of lengths of all sequences in the list of all sequences. X axis: sequence length, Y axis:
+    Number of reads
+
+    :param length_all_sequences_dict: dictionary of number of reads of a particular length, where particular length is
+                                      the key
+    :param plot_directory: Name of the directory to save plots
+    :return: nothing
+    """
 
     # Calculate max and min sequence length in the distribution - this will define the x-range of the plot
     max_sequence_length = max(length_all_sequences_dict.keys())
@@ -296,6 +361,9 @@ def plot_sequence_length_distribution(length_all_sequences_dict, plot_directory)
     plt.xticks(x_range)  # xticks positions
     ax.set_xticklabels(x_range, fontsize = 12)
 
+    # Setting x axis grid
+    ax.xaxis.grid(which = "major", linestyle = '-.', linewidth = 0.5, alpha = 0.5)
+
     # Setting range of y axis as ceiling(maximum length) to auto-scale
     y_range = int(math.ceil(max(length_all_sequences_dict.values()) / 100.0)) * 100
 
@@ -317,6 +385,14 @@ def plot_sequence_length_distribution(length_all_sequences_dict, plot_directory)
 
 
 def write_csv_over_represented_sequences(sorted_sequences_by_counts, total_num_sequences, plot_directory):
+    """
+    Writes the most over-represented sequences (most occurring sequences that make up > 0.1% of all the sequences)
+
+    :param sorted_sequences_by_counts: dictionary of over-represented sequences (keys) with occurrences (values)
+    :param total_num_sequences: Total number of sequences in input FASTQ file
+    :param plot_directory: Name of the directory to save plots
+    :return: nothing
+    """
 
     print "Writing over-represented sequences to disk"
 

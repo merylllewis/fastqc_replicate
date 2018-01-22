@@ -32,6 +32,13 @@ def per_sequence_quality(sequences, quality_scores, plot_directory):
 
 
 def per_base_sequence_content(sequences, plot_directory):
+    """
+    Calculates percentage occurrence of each base at each position over all sequences
+
+    :param sequences: a list of all sequences
+    :param plot_directory: Name of the directory to save plots
+    :return: nothing, calls plotting function % occurrence of each base at each position, %GC content at each position
+    """
 
     sequence_length = len(sequences[0])
     num_sequences = len(sequences)
@@ -55,6 +62,14 @@ def per_base_sequence_content(sequences, plot_directory):
 
 
 def per_base_sequence_quality(quality_scores, plot_directory):
+    """
+    Calculates the quality scores at each postion over all sequences and plots a box-plot (median, spread) over all
+    positions
+
+    :param quality_scores: a list of a list of quality scores for each sequence
+    :param plot_directory: Name of the directory to save plots
+    :return: Nothing, calls plotting function to plot the box plot of quality scores over all positions
+    """
 
     # Invert indexing of quality scores to [position][sequence]
     quality_scores_by_position = np.array(quality_scores)
@@ -66,6 +81,12 @@ def per_base_sequence_quality(quality_scores, plot_directory):
 
 
 def calculate_gc_content(sequence):
+    """
+    Calculates percentage GC content of an input sequence
+
+    :param sequence: an input sequence
+    :return: percentage GC content of an input sequence
+    """
     gc_bases = ["G", "C"]
     total_gc_content = 0
 
@@ -80,6 +101,13 @@ def calculate_gc_content(sequence):
 
 
 def per_sequence_gc_content(sequences, plot_directory):
+    """
+    Calculate percentage GC content for all sequences
+
+    :param sequences: a list of all sequences
+    :param plot_directory: Name of the directory to save plots
+    :return: nothing, calls plotting function to plot number of reads v/s %GC content
+    """
 
     # TODO: Plot theoretical GC content
 
@@ -93,6 +121,16 @@ def per_sequence_gc_content(sequences, plot_directory):
 
 
 def sequence_duplication(sequences, plot_directory):
+    """
+    Calculates number of duplicated and unique sequences and calls plotting function to plot percentage of duplicated
+    of the total reads and unique reads. Calculates over-represented sequences and calls writing function to save them
+    in a CSV file
+
+    :param sequences: a list of all sequences
+    :param plot_directory: Name of the directory to save plots
+    :return: nothing, calls plotting function for duplicated reads distribution, writing function for over-represented
+             sequences
+    """
 
     num_occurrence_each_sequence = dict()   # Dictionary to store the number of occurrences of each sequence
     total_num_sequences = len(sequences)
@@ -147,6 +185,13 @@ def sequence_duplication(sequences, plot_directory):
 
 
 def sequence_length_distribution(sequences, plot_directory):
+    """
+    Calculates the distribution of length of all sequences in the list of sequences
+
+    :param sequences: a list of all sequences
+    :param plot_directory: Name of the directory to save plots
+    :return: nothing, calls plotting function for the distribution of length of all sequences
+    """
     length_all_sequences_dict = dict()
 
     for sequence in sequences:
