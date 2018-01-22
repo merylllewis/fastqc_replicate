@@ -4,119 +4,157 @@ import fastqc_plots
 
 def per_sequence_quality(sequences, quality_scores, plot_directory):
     """
-    Calculates average quality scores for each sequence. Average is the sum of a sequence's quality scores/
+    Calculates average quality scores for each sequence. Average is the sum of a sequence's quality scores, divided by
     length of sequence
+
     :param sequences: a list of all sequences
     :param quality_scores: a list of a list of quality scores for each sequence
     :param plot_directory: Name of the directory to save plots
     :return: nothing, calls plotting function for average quality scores
+
     """
+
+    # Create new list to store average quality scores
     average_q_scores = []
-    # y axis: number of reads, x axis: quality scores
+
     for i in range(len(sequences)):
-        sum_q_scores = 0
+
+        sum_q_scores = 0    # Find sum of quality scores at all positions for this sequence.
+
         for j in range(len(quality_scores[i])):
             sum_q_scores += quality_scores[i][j]
+
+        # Average score = sum divided by length of sequence
         average_q_scores.append(float(sum_q_scores/len(quality_scores[i])))
 
+    # Calling plotting function for number of reads v/s average quality scores
     fastqc_plots.plot_per_sequence_quality(average_q_scores, plot_directory)
 
 
 def per_base_sequence_content(sequences, plot_directory):
-    occurrence_bases = {key: np.zeros(len(sequences[0])) for key in ["A", "C", "G", "T", "N"]}
+
+    sequence_length = len(sequences[0])
+    num_sequences = len(sequences)
+
+    percent_occurrence_all_bases = {key: np.zeros(sequence_length) for key in ["A", "C", "G", "T", "N"]}
+
     for each_sequence in sequences:
-
         for position in range(len(each_sequence)):
-                occurrence_bases[each_sequence[position]][position] += 1
-    group_by_base = []
-    for base in occurrence_bases.keys():
-        group_by_base.append(occurrence_bases[base])
+            base_at_position = each_sequence[position]
+            # Add percent contribution of this base at this position
+            percent_occurrence_all_bases[base_at_position][position] += (100.0 / float(num_sequences))
 
-    number_positions = len(occurrence_bases["A"])
+    gc_per_position = percent_occurrence_all_bases["G"] + percent_occurrence_all_bases["C"]
 
-    for position in range(0, number_positions):
+    # Calling plotting function for percent occurrence of all bases at each position
+    fastqc_plots.plot_per_base_sequence_content(percent_occurrence_all_bases, plot_directory)
 
-        cumulative = 0
-
-        for base in occurrence_bases.keys():
-            cumulative += occurrence_bases[base][position]
-
-        for base in range(0, len(occurrence_bases)):
-            group_by_base[base][position] /= float(cumulative) / 100
-
-    fastqc_plots.plot_per_base_sequence_content(group_by_base, plot_directory)
-
-    gc_per_position = np.zeros(number_positions)
-    for i in range(number_positions):
-        gc_per_position[i] = group_by_base[1][i] + group_by_base[2][i]
-
-    fastqc_plots.gc_content(gc_per_position, np.linspace(1, number_positions, number_positions, dtype = "int"), plot_directory)
+    # Calling plotting function for percent GC content at each position
+    fastqc_plots.gc_content(gc_per_position, np.linspace(1, sequence_length, sequence_length, dtype = "int"),
+                            plot_directory)
 
 
 def per_base_sequence_quality(quality_scores, plot_directory):
 
-    quality_by_position = []
+    # Invert indexing of quality scores to [position][sequence]
+    quality_scores_by_position = np.array(quality_scores)
+    quality_scores_by_position = np.transpose(quality_scores_by_position)
+    quality_scores_by_position = quality_scores_by_position.tolist()
 
-    for i in range(0, len(quality_scores[0])):
-        new_list = []
-
-        for j in range(0, len(quality_scores)):
-            new_list.append(quality_scores[j][i])
-
-        quality_by_position.append(new_list)
-
-    fastqc_plots.plot_per_base_sequence_quality(quality_by_position, plot_directory)
+    # Calling plotting function for sequence quality
+    fastqc_plots.plot_per_base_sequence_quality(quality_scores_by_position, plot_directory)
 
 
-def gc_content(sequence):
+def calculate_gc_content(sequence):
     gc_bases = ["G", "C"]
     total_gc_content = 0
 
     for base in sequence:
         if base in gc_bases:
             total_gc_content += 1
-    total_gc_content = 100 * float(total_gc_content)/len(sequence)
 
-    return total_gc_content
+    # Calculate percent GC content in sequence
+    percent_gc_content = 100 * float(total_gc_content)/len(sequence)
+
+    return percent_gc_content
 
 
 def per_sequence_gc_content(sequences, plot_directory):
-    # TODO: figure out theoretical gc content
-    gc_content_by_sequence = []
-    for each_sequence in sequences:
-        gc_content_by_sequence.append(gc_content(each_sequence))
 
+    # TODO: Plot theoretical GC content
+
+    gc_content_by_sequence = []
+
+    for each_sequence in sequences:
+        gc_content_by_sequence.append(calculate_gc_content(each_sequence))
+
+    # Calling plotting function to plot Number of reads v/s mean %GC content
     fastqc_plots.plot_per_sequence_gc_content(gc_content_by_sequence, plot_directory)
 
 
 def sequence_duplication(sequences, plot_directory):
-    counts_each_sequence = dict()
+
+    num_occurrence_each_sequence = dict()   # Dictionary to store the number of occurrences of each sequence
     total_num_sequences = len(sequences)
+
     for sequence in sequences:
 
+        # If the sequence length is over 75, only the first 50 positions are used, according to the original FASTQC
         if len(sequence) > 75:
             sequence_key = sequence[0:50]
         else:
             sequence_key = sequence
 
-        if sequence_key in counts_each_sequence.keys():
-            counts_each_sequence[sequence_key] += 1
+        if sequence_key in num_occurrence_each_sequence.keys():
+            num_occurrence_each_sequence[sequence_key] += 1
         else:
-            counts_each_sequence[sequence_key] = 1
+            num_occurrence_each_sequence[sequence_key] = 1
 
-    duplication_level_counts = np.zeros(10, dtype = "float")
-    deduplicated_counts = np.zeros(10, dtype = "float")
+    # Define all sequences which make up more than 0.1% of all reads as over-represented (according to the original
+    # FASTQC) and create a new dictionary with just these sequences and their frequencies
+    over_represented_dict = dict((sequence, counts) for sequence, counts in num_occurrence_each_sequence.items() if
+                                 counts >= total_num_sequences * 0.1 / 100)
 
-    for duplication_level in range(1, 11):
-        for key in counts_each_sequence.keys():
-            if counts_each_sequence[key] == duplication_level:
-                duplication_level_counts[duplication_level-1] += float(duplication_level)*(100.0/total_num_sequences)
-                deduplicated_counts[duplication_level-1] += 100.0/len(counts_each_sequence.keys())
+    # Sort dictionary by value in descending order - most over-represented sequences appear first
+    sorted_sequences_by_counts = sorted(over_represented_dict.items(), key = lambda item: item[1], reverse = True)
 
-    remainder_after_deduplication = 100.0 * float(len(counts_each_sequence.keys()))/total_num_sequences
+    # Write to CSV
+    fastqc_plots.write_csv_over_represented_sequences(sorted_sequences_by_counts, total_num_sequences, plot_directory)
 
-    fastqc_plots.plot_sequence_duplication(duplication_level_counts, deduplicated_counts, remainder_after_deduplication,
+    # Number of duplicated sequences
+    num_duplication_levels_computed = 10
+    duplication_counts = np.zeros(num_duplication_levels_computed, dtype = "float")
+
+    # Number of unique sequences
+    deduplicated_counts = np.zeros(num_duplication_levels_computed, dtype = "float")
+
+    for duplication_level in range(1, num_duplication_levels_computed+1):
+
+        for key in num_occurrence_each_sequence.keys():
+
+            if num_occurrence_each_sequence[key] == duplication_level:
+                # Add to dictionary as a percent contribution of all (unique and duplicate) sequences
+                duplication_counts[duplication_level-1] += float(duplication_level) * (100.0/total_num_sequences)
+
+                # Add to dictionary as a percent contribution of unique sequences
+                deduplicated_counts[duplication_level-1] += 100.0/len(num_occurrence_each_sequence.keys())
+
+    remainder_after_deduplication = 100.0 * float(len(num_occurrence_each_sequence.keys()))/total_num_sequences
+
+    # Calls plotting function for percentage duplicated reads distribution
+    fastqc_plots.plot_sequence_duplication(duplication_counts, deduplicated_counts, remainder_after_deduplication,
                                            plot_directory)
 
 
+def sequence_length_distribution(sequences, plot_directory):
+    length_all_sequences_dict = dict()
 
+    for sequence in sequences:
+        sequence_length = len(sequence)
+
+        if sequence_length in length_all_sequences_dict.keys():
+            length_all_sequences_dict[sequence_length] += 1
+        else:
+            length_all_sequences_dict[sequence_length] = 1
+
+    fastqc_plots.plot_sequence_length_distribution(length_all_sequences_dict, plot_directory)
